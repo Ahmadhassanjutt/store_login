@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class VisualSearchScreen extends StatefulWidget {
 class _VisualSearchScreenState extends State<VisualSearchScreen> {
   final ImagePicker _picker = ImagePicker();
   File? _pickedImage;
+  Uint8List? _imageBytes;
   bool _isLoading = false;
 
   Future<void> _pickImage(ImageSource source) async {
@@ -32,10 +34,13 @@ class _VisualSearchScreenState extends State<VisualSearchScreen> {
         return;
       }
 
-      setState(() {
+      if (kIsWeb) {
+        _imageBytes = await file.readAsBytes();
+      } else {
         _pickedImage = File(file.path);
-        _isLoading = false;
-      });
+      }
+
+      setState(() => _isLoading = false);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,12 +86,11 @@ class _VisualSearchScreenState extends State<VisualSearchScreen> {
             ),
           ),
           // Display picked image or fallback gradient
-          if (_pickedImage != null)
+          if (_pickedImage != null || _imageBytes != null)
             Positioned.fill(
               child: kIsWeb
-                  ? // For web, use Image.network with file URI
-                    Image.network(
-                      _pickedImage!.path,
+                  ? Image.memory(
+                      _imageBytes!,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
@@ -103,8 +107,7 @@ class _VisualSearchScreenState extends State<VisualSearchScreen> {
                         );
                       },
                     )
-                  : // For mobile, use Image.file
-                    Image.file(
+                  : Image.file(
                       _pickedImage!,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {

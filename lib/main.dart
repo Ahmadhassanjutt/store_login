@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'screens/crop_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/sign_up_screen.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/login',
       routes: {
+        '/crop': (context) => const CropScreen(),
         '/forgot': (context) => const ForgotPasswordScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
